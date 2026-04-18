@@ -1,0 +1,66 @@
+{
+  "name": "@leelakrishnaravuri/agent-budget",
+  "version": "1.0.0",
+  "description": "Token budget & cost tracking middleware for LLM-powered AI agents. Zero dependencies.",
+  "author": "leelakrishnaravuri",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/agent-budget"
+  },
+  "homepage": "https://github.com/yourusername/agent-budget#readme",
+  "bugs": {
+    "url": "https://github.com/yourusername/agent-budget/issues"
+  },
+  "keywords": [
+    "llm",
+    "ai",
+    "agent",
+    "tokens",
+    "cost",
+    "budget",
+    "tracking",
+    "anthropic",
+    "openai",
+    "gemini",
+    "middleware",
+    "ai-agent"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/esm/index.d.ts",
+        "default": "./dist/esm/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/index.d.ts",
+        "default": "./dist/cjs/index.cjs"
+      }
+    }
+  },
+  "main": "./dist/cjs/index.cjs",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/esm/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "build": "npm run build:esm && npm run build:cjs && npm run build:cjs-pkg",
+    "build:esm": "tsc -p tsconfig.json",
+    "build:cjs": "tsc -p tsconfig.cjs.json",
+    "build:cjs-pkg": "node scripts/write-cjs-pkg.js",
+    "test": "node --experimental-vm-modules test/index.test.js",
+    "prepublishOnly": "npm run build && npm test",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}
