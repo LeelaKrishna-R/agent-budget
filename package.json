@@ -6,11 +6,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/agent-budget"
+    "url": "https://github.com/LeelaKrishna-R/agent-budget"
   },
-  "homepage": "https://github.com/yourusername/agent-budget#readme",
+  "homepage": "https://github.com/LeelaKrishna-R/agent-budget#readme",
   "bugs": {
-    "url": "https://github.com/yourusername/agent-budget/issues"
+    "url": "https://github.com/LeelaKrishna-R/agent-budget/issues"
   },
   "keywords": [
     "llm",
