@@ -2,10 +2,14 @@
 
 **Token budget and cost tracking middleware for LLM-powered AI agents.**
 
+![An agent with a $0.50 budget: four calls go through, it warns at 80%, and the fifth call is refused before it is sent](docs/demo.svg)
+
+A real run of [`docs/demo/demo.mjs`](docs/demo/demo.mjs): it uses a stand-in model, so it runs offline and costs nothing. Write-up: [ravuri.dev/work/agent-budget](https://www.ravuri.dev/work/agent-budget).
+
 Zero dependencies. Works with Anthropic, OpenAI, Google Gemini, Mistral, and any custom model. Dual ESM + CJS. Full TypeScript types.
 
 ```
-npm install agent-budget
+npm install @leelakrishnaravuri/agent-budget
 ```
 
 ---
@@ -24,7 +28,7 @@ LLM agents chain dozens to hundreds of calls. Without guardrails, a runaway loop
 ## Quick start
 
 ```ts
-import { AgentBudget } from 'agent-budget';
+import { AgentBudget } from '@leelakrishnaravuri/agent-budget';
 
 const budget = new AgentBudget({
   limitUSD: 0.50,
@@ -196,7 +200,7 @@ AgentBudget.listModels(); // { ...all registered models }
 All errors are named classes with a `code` discriminant for reliable `catch` narrowing:
 
 ```ts
-import { BudgetExceededError, BudgetConfigError, UnknownModelError } from 'agent-budget';
+import { BudgetExceededError, BudgetConfigError, UnknownModelError } from '@leelakrishnaravuri/agent-budget';
 
 try {
   budget.assertNotExceeded();
@@ -246,7 +250,7 @@ Use `AgentBudget.listModels()` for the full list.
 ## Multi-agent example
 
 ```ts
-import { AgentBudget } from 'agent-budget';
+import { AgentBudget } from '@leelakrishnaravuri/agent-budget';
 
 // Shared budget across an agent pipeline
 const budget = new AgentBudget({ limitUSD: 2.00, warnAtPercent: 75 });
