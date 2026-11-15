@@ -1,5 +1,7 @@
 # agent-budget
 
+[![CI](https://github.com/LeelaKrishna-R/agent-budget/actions/workflows/ci.yml/badge.svg)](https://github.com/LeelaKrishna-R/agent-budget/actions/workflows/ci.yml)
+
 **Token budget and cost tracking middleware for LLM-powered AI agents.**
 
 ![An agent with a $0.50 budget: four calls go through, it warns at 80%, and the fifth call is refused before it is sent](docs/demo.svg)
