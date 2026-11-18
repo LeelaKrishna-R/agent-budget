@@ -12,6 +12,9 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - `estimate(usage, model?)` — the USD cost of a planned call, without tracking it
 - `canAfford(usage, model?)` — whether a planned call fits in what's left, so the call that would cross the limit is caught before it's made
 
+### Fixed
+- OpenAI responses no longer bill cached prompt tokens twice. `prompt_tokens` already includes `prompt_tokens_details.cached_tokens`, so `wrap()` now tracks only the uncached part as input and the cached part as cache reads
+
 ## [1.0.0] — 2026-04-18
 
 ### Added

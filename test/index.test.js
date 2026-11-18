@@ -253,9 +253,18 @@ test('extracts OpenAI shape', async () => {
   await b.wrap(async () => fakeOpenAIResponse, 'gpt-4o');
   assert.equal(b.callCount, 1);
   const entry = b.log()[0];
-  assert.equal(entry.inputTokens, 800);
+  assert.equal(entry.inputTokens, 600);   // prompt_tokens includes the 200 cached
   assert.equal(entry.outputTokens, 300);
   assert.equal(entry.cacheReadTokens, 200);
+});
+
+test('OpenAI cached prompt tokens are billed once, not twice', async () => {
+  const b = new AgentBudget({ limitUSD: 10, pricing: { 'oai-test': { input: 2, output: 8, cacheRead: 0.5 } } });
+  await b.wrap(async () => ({
+    usage: { prompt_tokens: 1_000_000, completion_tokens: 0, prompt_tokens_details: { cached_tokens: 400_000 } },
+  }), 'oai-test');
+  // 600k uncached at $2/1M + 400k cached at $0.50/1M = $1.20 + $0.20
+  assertClose(b.usedUSD, 1.40);
 });
 
 test('guardBefore prevents call when exceeded', async () => {

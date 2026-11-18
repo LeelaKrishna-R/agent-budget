@@ -28,11 +28,14 @@ function extractUsage(response) {
     }
     // ── OpenAI ────────────────────────────────────────────────────────────────
     if (typeof r.usage?.prompt_tokens === 'number') {
+        // OpenAI cached input tokens live under usage.prompt_tokens_details.cached_tokens,
+        // and are already counted in prompt_tokens. Split them out so they're billed once,
+        // at the cache rate, not again at the full input rate.
+        const cached = Math.min(r.usage.prompt_tokens_details?.cached_tokens ?? 0, r.usage.prompt_tokens);
         return {
-            inputTokens: r.usage.prompt_tokens,
+            inputTokens: r.usage.prompt_tokens - cached,
             outputTokens: r.usage.completion_tokens ?? 0,
-            // OpenAI cached input tokens live under usage.prompt_tokens_details.cached_tokens
-            cacheReadTokens: r.usage.prompt_tokens_details?.cached_tokens ?? 0,
+            cacheReadTokens: cached,
         };
     }
     // ── Already normalized ────────────────────────────────────────────────────

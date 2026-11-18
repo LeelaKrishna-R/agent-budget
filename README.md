@@ -254,7 +254,7 @@ Pricing is per 1M tokens (USD), verified April 2026.
 | Mistral | `codestral-latest` | $0.20 | $0.60 |
 | Meta (hosted) | `llama-3.3-70b` | $0.59 | $0.79 |
 
-Anthropic models include cache read/write pricing. OpenAI models extract cached prompt tokens from `usage.prompt_tokens_details.cached_tokens`.
+Anthropic models include cache read/write pricing. OpenAI models extract cached prompt tokens from `usage.prompt_tokens_details.cached_tokens` and subtract them from `prompt_tokens`, so they are billed once at the cache rate.
 
 Use `AgentBudget.listModels()` for the full list.
 
