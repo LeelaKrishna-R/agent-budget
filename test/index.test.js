@@ -400,6 +400,30 @@ test('zero-token call is valid and costs $0', () => {
   assert.equal(snap.calls, 1);
 });
 
+// ─── Before a call: estimate and canAfford ──
+console.log('\n── Estimate and canAfford ──');
+
+test('estimate prices a call without tracking it', () => {
+  const b = new AgentBudget({ model: 'gpt-4o', limitUSD: 10 });
+  assertClose(b.estimate({ inputTokens: 1_000_000, outputTokens: 100_000 }), 3.5);
+  assert.equal(b.callCount, 0);
+  assert.equal(b.usedUSD, 0);
+});
+
+test('canAfford catches the call that would push past the limit', () => {
+  const b = new AgentBudget({ model: 'gpt-4o', limitUSD: 5 });
+  b.track({ inputTokens: 1_000_000, outputTokens: 0 });            // $2.50 used
+  assert.equal(b.exceeded, false);
+  assert.equal(b.canAfford({ inputTokens: 1_000_000, outputTokens: 0 }), true);   // exactly $5.00: fits
+  assert.equal(b.canAfford({ inputTokens: 1_000_000, outputTokens: 1 }), false);  // a hair over: doesn't
+});
+
+test('estimate and canAfford need a model and a known one', () => {
+  const b = new AgentBudget({ limitUSD: 1 });
+  assert.throws(() => b.estimate({ inputTokens: 1, outputTokens: 1 }), BudgetConfigError);
+  assert.throws(() => b.canAfford({ inputTokens: 1, outputTokens: 1 }, 'no-such-model'), UnknownModelError);
+});
+
 // ─── Summary ──────────────────────────────────────────────────────────────────
 // Give async tests time to settle
 await new Promise(r => setTimeout(r, 100));

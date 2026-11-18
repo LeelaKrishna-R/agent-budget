@@ -51,6 +51,19 @@ export declare class AgentBudget extends TypedEmitter<BudgetEventMap> {
      */
     assertNotExceeded(): void;
     /**
+     * The cost in USD of a call with these token counts, without tracking it.
+     * Use it to price a planned call from your expected input and a max-tokens cap.
+     * @throws {UnknownModelError} if model is not registered.
+     * @throws {BudgetConfigError} if model is not provided.
+     */
+    estimate(usage: UsageInput, model?: string): number;
+    /**
+     * Whether a call with these token counts fits in what is left of the budget.
+     * Unlike assertNotExceeded(), this catches the one call that would push you over.
+     */
+    canAfford(usage: UsageInput, model?: string): boolean;
+    private _costMicro;
+    /**
      * Reset all counters and state. Optionally keep the pricing map and config.
      * Emits the 'reset' event after clearing.
      */

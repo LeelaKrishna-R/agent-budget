@@ -6,6 +6,12 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
+## [Unreleased]
+
+### Added
+- `estimate(usage, model?)` — the USD cost of a planned call, without tracking it
+- `canAfford(usage, model?)` — whether a planned call fits in what's left, so the call that would cross the limit is caught before it's made
+
 ## [1.0.0] — 2026-04-18
 
 ### Added

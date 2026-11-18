@@ -148,6 +148,31 @@ class AgentBudget extends emitter_js_1.TypedEmitter {
             throw new types_js_1.BudgetExceededError(this._buildSnapshot());
     }
     /**
+     * The cost in USD of a call with these token counts, without tracking it.
+     * Use it to price a planned call from your expected input and a max-tokens cap.
+     * @throws {UnknownModelError} if model is not registered.
+     * @throws {BudgetConfigError} if model is not provided.
+     */
+    estimate(usage, model) {
+        return (0, math_js_1.microToUsd)(this._costMicro(usage, model, 'estimate'));
+    }
+    /**
+     * Whether a call with these token counts fits in what is left of the budget.
+     * Unlike assertNotExceeded(), this catches the one call that would push you over.
+     */
+    canAfford(usage, model) {
+        const limitMicro = BigInt(Math.round(this.limitUSD * Number(math_js_1.MICRO_PER_USD)));
+        return this._usedMicro + this._costMicro(usage, model, 'canAfford') <= limitMicro;
+    }
+    _costMicro(usage, model, method) {
+        const resolvedModel = model ?? this.defaultModel;
+        if (!resolvedModel) {
+            throw new types_js_1.BudgetConfigError(`model is required. Pass it as the second argument to .${method}(), or set a default in the constructor.`);
+        }
+        (0, extract_js_1.validateUsage)(usage);
+        return (0, math_js_1.calcCostMicro)(usage, (0, pricing_js_1.resolvePricing)(resolvedModel, this._pricingMap));
+    }
+    /**
      * Reset all counters and state. Optionally keep the pricing map and config.
      * Emits the 'reset' event after clearing.
      */

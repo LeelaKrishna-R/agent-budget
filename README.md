@@ -88,6 +88,17 @@ const response = await llm.call(...);
 budget.track(response.usage, model);
 ```
 
+`assertNotExceeded()` only stops you once the limit is already crossed. To catch the one call
+that would push you over, price it first from your expected input and the max tokens you allow:
+
+```ts
+const planned = { inputTokens: 12_000, outputTokens: 4_000 };  // outputTokens = your max_tokens
+budget.estimate(planned);   // USD this call would cost, nothing tracked
+if (!budget.canAfford(planned)) {
+  // fall back to a cheaper model, trim the context, or stop
+}
+```
+
 Or enable it globally for all `.wrap()` calls:
 
 ```ts
