@@ -433,6 +433,14 @@ test('estimate and canAfford need a model and a known one', () => {
   assert.throws(() => b.canAfford({ inputTokens: 1, outputTokens: 1 }, 'no-such-model'), UnknownModelError);
 });
 
+test('Claude Haiku 4.5 is priced as Haiku 4.5, not Haiku 3.5', () => {
+  // $1 / $5 per 1M tokens; cache reads 0.1x input, 5-minute cache writes 1.25x input
+  const b = new AgentBudget({ model: 'claude-haiku-4-5-20251001', limitUSD: 100 });
+  assertClose(b.estimate({ inputTokens: 1_000_000, outputTokens: 1_000_000 }), 6.0);
+  assertClose(b.estimate({ inputTokens: 0, outputTokens: 0, cacheReadTokens: 1_000_000 }), 0.10);
+  assertClose(b.estimate({ inputTokens: 0, outputTokens: 0, cacheWriteTokens: 1_000_000 }), 1.25);
+});
+
 // ─── Summary ──────────────────────────────────────────────────────────────────
 // Give async tests time to settle
 await new Promise(r => setTimeout(r, 100));

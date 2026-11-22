@@ -242,7 +242,7 @@ Pricing is per 1M tokens (USD), verified April 2026.
 |---|---|---|---|
 | Anthropic | `claude-opus-4-20250514` | $15.00 | $75.00 |
 | Anthropic | `claude-sonnet-4-20250514` | $3.00 | $15.00 |
-| Anthropic | `claude-haiku-4-5-20251001` | $0.80 | $4.00 |
+| Anthropic | `claude-haiku-4-5-20251001` | $1.00 | $5.00 |
 | OpenAI | `gpt-4o` | $2.50 | $10.00 |
 | OpenAI | `gpt-4o-mini` | $0.15 | $0.60 |
 | OpenAI | `o1` | $15.00 | $60.00 |

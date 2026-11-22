@@ -13,6 +13,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - `canAfford(usage, model?)` — whether a planned call fits in what's left, so the call that would cross the limit is caught before it's made
 
 ### Fixed
+- `claude-haiku-4-5-20251001` was priced at Claude Haiku 3.5's rates ($0.80 / $4.00 per 1M tokens). It is now Haiku 4.5's: $1.00 input, $5.00 output, $0.10 cache reads, $1.25 cache writes
 - OpenAI responses no longer bill cached prompt tokens twice. `prompt_tokens` already includes `prompt_tokens_details.cached_tokens`, so `wrap()` now tracks only the uncached part as input and the cached part as cache reads
 
 ## [1.0.0] — 2026-04-18
