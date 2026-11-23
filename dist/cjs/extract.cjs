@@ -9,6 +9,7 @@ exports.validateUsage = validateUsage;
  *   Anthropic: response.usage.input_tokens / output_tokens / cache_read_input_tokens / cache_creation_input_tokens
  *   OpenAI:    response.usage.prompt_tokens / completion_tokens (Chat Completions)
  *              response.usage.input_tokens / output_tokens / input_tokens_details (Responses API)
+ *   Gemini:    response.usageMetadata.promptTokenCount / candidatesTokenCount (or usage_metadata.*_token_count)
  *   Normalized: already a UsageInput ({ inputTokens, outputTokens })
  *
  * Throws a descriptive error if the shape is unrecognized.
@@ -51,6 +52,20 @@ function extractUsage(response) {
             cacheReadTokens: cached,
         };
     }
+    // ── Gemini ────────────────────────────────────────────────────────────────
+    // promptTokenCount includes cachedContentTokenCount, so the cached part is split out to be
+    // billed once at the cache rate; thinking (thoughtsTokenCount) is billed as output.
+    const g = r.usageMetadata ?? r.usage_metadata;
+    if (g && typeof (g.promptTokenCount ?? g.prompt_token_count) === 'number') {
+        const prompt = g.promptTokenCount ?? g.prompt_token_count;
+        const cached = Math.min(g.cachedContentTokenCount ?? g.cached_content_token_count ?? 0, prompt);
+        return {
+            inputTokens: prompt - cached,
+            outputTokens: (g.candidatesTokenCount ?? g.candidates_token_count ?? 0) +
+                (g.thoughtsTokenCount ?? g.thoughts_token_count ?? 0),
+            cacheReadTokens: cached,
+        };
+    }
     // ── Already normalized ────────────────────────────────────────────────────
     // Only accept this if it has EXACTLY the required shape — never trust partial matches.
     if (typeof r.inputTokens === 'number' && typeof r.outputTokens === 'number') {
@@ -61,7 +76,7 @@ function extractUsage(response) {
             cacheWriteTokens: typeof r.cacheWriteTokens === 'number' ? r.cacheWriteTokens : 0,
         };
     }
-    throw new TypeError('[agent-budget] Unrecognized response shape. Expected Anthropic or OpenAI usage format. ' +
+    throw new TypeError('[agent-budget] Unrecognized response shape. Expected Anthropic, OpenAI or Gemini usage format. ' +
         'Pass usage manually: budget.track({ inputTokens, outputTokens }, model)');
 }
 /**

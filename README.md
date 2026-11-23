@@ -51,7 +51,7 @@ budget.on('tick',     (snap, entry) => console.log(`call #${entry.id} cost $${en
 
 ### Option A — wrap (recommended)
 
-Auto-extracts token usage from Anthropic and OpenAI response shapes:
+Auto-extracts token usage from Anthropic, OpenAI and Gemini response shapes:
 
 ```ts
 const response = await budget.wrap(

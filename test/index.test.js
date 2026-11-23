@@ -291,6 +291,30 @@ test('Anthropic usage (no input_tokens_details) still reads input_tokens as unca
   assertClose(b.usedUSD, 1.40);
 });
 
+test('Gemini usageMetadata is read: cached split out, thinking billed as output', async () => {
+  const b = new AgentBudget({ limitUSD: 10, pricing: { 'gem-test': { input: 2, output: 8, cacheRead: 0.5 } } });
+  await b.wrap(async () => ({
+    candidates: [],
+    usageMetadata: {
+      promptTokenCount: 1_000_000, cachedContentTokenCount: 400_000,
+      candidatesTokenCount: 100_000, thoughtsTokenCount: 50_000, totalTokenCount: 1_150_000,
+    },
+  }), 'gem-test');
+  const entry = b.log()[0];
+  assert.equal(entry.inputTokens, 600_000);
+  assert.equal(entry.cacheReadTokens, 400_000);
+  assert.equal(entry.outputTokens, 150_000);
+  // 600k at $2 + 400k at $0.50 + 150k at $8 = $1.20 + $0.20 + $1.20
+  assertClose(b.usedUSD, 2.60);
+});
+
+test('Gemini usage_metadata in snake_case is read the same way', async () => {
+  const b = new AgentBudget({ limitUSD: 10, pricing: { 'gem-test': { input: 2, output: 8 } } });
+  await b.wrap(async () => ({ usage_metadata: { prompt_token_count: 1000, candidates_token_count: 200 } }), 'gem-test');
+  assert.equal(b.log()[0].inputTokens, 1000);
+  assert.equal(b.log()[0].outputTokens, 200);
+});
+
 test('guardBefore prevents call when exceeded', async () => {
   const b = new AgentBudget({ model: 'gpt-4o', limitUSD: 0.000001, guardBefore: true });
   try { await b.wrap(async () => ({ usage: { prompt_tokens: 100_000, completion_tokens: 50_000 } })); } catch {}
