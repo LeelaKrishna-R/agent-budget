@@ -3,7 +3,8 @@
  *
  * Supported shapes:
  *   Anthropic: response.usage.input_tokens / output_tokens / cache_read_input_tokens / cache_creation_input_tokens
- *   OpenAI:    response.usage.prompt_tokens / completion_tokens
+ *   OpenAI:    response.usage.prompt_tokens / completion_tokens (Chat Completions)
+ *              response.usage.input_tokens / output_tokens / input_tokens_details (Responses API)
  *   Normalized: already a UsageInput ({ inputTokens, outputTokens })
  *
  * Throws a descriptive error if the shape is unrecognized.
@@ -13,6 +14,18 @@ export function extractUsage(response) {
         throw new TypeError('[agent-budget] Cannot extract usage: response is not an object. Pass usage manually via .track().');
     }
     const r = response;
+    // ── OpenAI Responses API ──────────────────────────────────────────────────
+    // Same field names as Anthropic's, but input_tokens INCLUDES the cached tokens, which are
+    // reported under input_tokens_details.cached_tokens. Read as Anthropic's, every cached
+    // token would be billed at the full input rate; split them out as for Chat Completions.
+    if (typeof r.usage?.input_tokens === 'number' && r.usage.input_tokens_details != null) {
+        const cached = Math.min(r.usage.input_tokens_details.cached_tokens ?? 0, r.usage.input_tokens);
+        return {
+            inputTokens: r.usage.input_tokens - cached,
+            outputTokens: r.usage.output_tokens ?? 0,
+            cacheReadTokens: cached,
+        };
+    }
     // ── Anthropic ──────────────────────────────────────────────────────────────
     if (typeof r.usage?.input_tokens === 'number') {
         return {

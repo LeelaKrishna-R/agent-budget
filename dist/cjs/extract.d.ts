@@ -4,7 +4,8 @@ import type { UsageInput } from './types.js';
  *
  * Supported shapes:
  *   Anthropic: response.usage.input_tokens / output_tokens / cache_read_input_tokens / cache_creation_input_tokens
- *   OpenAI:    response.usage.prompt_tokens / completion_tokens
+ *   OpenAI:    response.usage.prompt_tokens / completion_tokens (Chat Completions)
+ *              response.usage.input_tokens / output_tokens / input_tokens_details (Responses API)
  *   Normalized: already a UsageInput ({ inputTokens, outputTokens })
  *
  * Throws a descriptive error if the shape is unrecognized.

@@ -267,6 +267,30 @@ test('OpenAI cached prompt tokens are billed once, not twice', async () => {
   assertClose(b.usedUSD, 1.40);
 });
 
+test('OpenAI Responses API cached input tokens are billed once, at the cache rate', async () => {
+  const b = new AgentBudget({ limitUSD: 10, pricing: { 'oai-test': { input: 2, output: 8, cacheRead: 0.5 } } });
+  await b.wrap(async () => ({
+    usage: {
+      input_tokens: 1_000_000, input_tokens_details: { cached_tokens: 400_000 },
+      output_tokens: 0, output_tokens_details: { reasoning_tokens: 0 }, total_tokens: 1_000_000,
+    },
+  }), 'oai-test');
+  const entry = b.log()[0];
+  assert.equal(entry.inputTokens, 600_000);
+  assert.equal(entry.cacheReadTokens, 400_000);
+  // 600k uncached at $2/1M + 400k cached at $0.50/1M = $1.20 + $0.20
+  assertClose(b.usedUSD, 1.40);
+});
+
+test('Anthropic usage (no input_tokens_details) still reads input_tokens as uncached', async () => {
+  const b = new AgentBudget({ limitUSD: 10, pricing: { 'ant-test': { input: 2, output: 8, cacheRead: 0.5 } } });
+  await b.wrap(async () => ({
+    usage: { input_tokens: 600_000, output_tokens: 0, cache_read_input_tokens: 400_000, cache_creation_input_tokens: null },
+  }), 'ant-test');
+  assert.equal(b.log()[0].inputTokens, 600_000);
+  assertClose(b.usedUSD, 1.40);
+});
+
 test('guardBefore prevents call when exceeded', async () => {
   const b = new AgentBudget({ model: 'gpt-4o', limitUSD: 0.000001, guardBefore: true });
   try { await b.wrap(async () => ({ usage: { prompt_tokens: 100_000, completion_tokens: 50_000 } })); } catch {}
