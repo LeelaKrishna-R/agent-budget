@@ -9,6 +9,8 @@ export interface ModelPricing {
   cacheRead?: number | undefined;
   /** Optional: cost per 1M cached-write tokens */
   cacheWrite?: number | undefined;
+  /** Optional: cost per 1M 1-hour cached-write tokens (defaults to 2x input, Anthropic's 1-hour rate) */
+  cacheWrite1h?: number | undefined;
 }
 
 export type PricingMap = Record<string, ModelPricing>;
@@ -22,6 +24,8 @@ export interface UsageInput {
   cacheReadTokens?: number;
   /** Cached tokens written */
   cacheWriteTokens?: number;
+  /** The part of cacheWriteTokens written with a 1-hour TTL (Anthropic bills these at 2x input, not 1.25x) */
+  cacheWrite1hTokens?: number;
 }
 
 // ─── Call log entry ───────────────────────────────────────────────────────────

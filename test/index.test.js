@@ -315,6 +315,27 @@ test('Gemini usage_metadata in snake_case is read the same way', async () => {
   assert.equal(b.log()[0].outputTokens, 200);
 });
 
+test('Anthropic 1-hour cache writes are billed at 2x input, 5-minute ones at the cacheWrite rate', async () => {
+  const b = new AgentBudget({ limitUSD: 10, pricing: { 'ant-test': { input: 2, output: 8, cacheWrite: 2.5 } } });
+  await b.wrap(async () => ({
+    usage: {
+      input_tokens: 0, output_tokens: 0, cache_creation_input_tokens: 1_000_000,
+      cache_creation: { ephemeral_5m_input_tokens: 600_000, ephemeral_1h_input_tokens: 400_000 },
+    },
+  }), 'ant-test');
+  // 600k at $2.50 + 400k at $4.00 (2 x $2) = $1.50 + $1.60
+  assertClose(b.usedUSD, 3.10);
+  assert.equal(b.log()[0].cacheWriteTokens, 1_000_000);
+});
+
+test('a model can set its own 1-hour write rate; without the breakdown every write is a 5-minute one', async () => {
+  const b = new AgentBudget({ limitUSD: 10, pricing: { 'x': { input: 2, output: 8, cacheWrite: 2.5, cacheWrite1h: 3 } } });
+  b.track({ inputTokens: 0, outputTokens: 0, cacheWriteTokens: 1_000_000, cacheWrite1hTokens: 1_000_000 }, 'x');
+  assertClose(b.usedUSD, 3.00);
+  b.track({ inputTokens: 0, outputTokens: 0, cacheWriteTokens: 1_000_000 }, 'x');
+  assertClose(b.usedUSD, 5.50);
+});
+
 test('guardBefore prevents call when exceeded', async () => {
   const b = new AgentBudget({ model: 'gpt-4o', limitUSD: 0.000001, guardBefore: true });
   try { await b.wrap(async () => ({ usage: { prompt_tokens: 100_000, completion_tokens: 50_000 } })); } catch {}

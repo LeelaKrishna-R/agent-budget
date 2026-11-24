@@ -39,8 +39,13 @@ function calcCostMicro(usage, pricing) {
     const outputCost = usdToMicro((usage.outputTokens / 1000000) * pricing.output);
     const cacheReadRate = pricing.cacheRead ?? pricing.input;
     const cacheWriteRate = pricing.cacheWrite ?? pricing.input;
+    const cacheWrite1hRate = pricing.cacheWrite1h ?? pricing.input * 2;
+    // A 1-hour write is part of cacheWriteTokens, billed at its own rate; the rest is a 5-minute write
+    const written = usage.cacheWriteTokens ?? 0;
+    const hour = Math.min(usage.cacheWrite1hTokens ?? 0, written);
     const cacheReadCost = usdToMicro(((usage.cacheReadTokens ?? 0) / 1000000) * cacheReadRate);
-    const cacheWriteCost = usdToMicro(((usage.cacheWriteTokens ?? 0) / 1000000) * cacheWriteRate);
+    const cacheWriteCost = usdToMicro(((written - hour) / 1000000) * cacheWriteRate) +
+        usdToMicro((hour / 1000000) * cacheWrite1hRate);
     return inputCost + outputCost + cacheReadCost + cacheWriteCost;
 }
 //# sourceMappingURL=math.js.map

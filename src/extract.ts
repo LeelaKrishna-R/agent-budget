@@ -41,6 +41,8 @@ export function extractUsage(response: unknown): UsageInput {
       outputTokens:      r.usage.output_tokens ?? 0,
       cacheReadTokens:   r.usage.cache_read_input_tokens ?? 0,
       cacheWriteTokens:  r.usage.cache_creation_input_tokens ?? 0,
+      // the per-TTL breakdown: 1-hour writes cost 2x input where 5-minute ones cost 1.25x
+      cacheWrite1hTokens: r.usage.cache_creation?.ephemeral_1h_input_tokens ?? 0,
     };
   }
 
@@ -80,6 +82,7 @@ export function extractUsage(response: unknown): UsageInput {
       outputTokens:     r.outputTokens,
       cacheReadTokens:  typeof r.cacheReadTokens === 'number' ? r.cacheReadTokens : 0,
       cacheWriteTokens: typeof r.cacheWriteTokens === 'number' ? r.cacheWriteTokens : 0,
+      cacheWrite1hTokens: typeof r.cacheWrite1hTokens === 'number' ? r.cacheWrite1hTokens : 0,
     };
   }
 
@@ -98,6 +101,7 @@ export function validateUsage(usage: UsageInput): void {
     'outputTokens',
     'cacheReadTokens',
     'cacheWriteTokens',
+    'cacheWrite1hTokens',
   ];
   for (const field of fields) {
     const val = usage[field];
